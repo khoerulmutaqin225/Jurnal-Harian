@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jurnal Harian</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6EEE9; --surface:#FFFFFF; --ink:#2B1E2A; --accent:#B5546E;
+    --accent-soft:#E8C9CE; --muted:#8A7A82; --line:#E4D7D0;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:inherit}
+  html{scroll-padding-top:env(safe-area-inset-top,0px)}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#211A1F; --surface:#2C232A; --ink:#F2E9E6; --accent:#E39AAE;
+      --accent-soft:#4A3640; --muted:#B9A6AF; --line:#44363D;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#211A1F; --surface:#2C232A; --ink:#F2E9E6; --accent:#E39AAE;
+    --accent-soft:#4A3640; --muted:#B9A6AF; --line:#44363D;
+  }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Inter',sans-serif; min-height:100%;
+    padding:40px 20px 60px;
+  }
+  .wrap{max-width:620px; margin:0 auto}
+  header{margin-bottom:28px}
+  .eyebrow{font-size:14px; color:var(--accent); margin:0 0 6px; font-style:italic; font-family:'Fraunces',serif}
+  h1{font-family:'Fraunces',serif; font-weight:600; font-size:38px; margin:0 0 8px; letter-spacing:-0.5px}
+  .sub{color:var(--muted); font-size:15px; margin:0}
+
+  .card{background:var(--surface); border-radius:18px; padding:30px; box-shadow:0 1px 2px rgba(0,0,0,.04); border:1px solid var(--line)}
+  .field{margin-bottom:26px}
+  label{display:block; font-size:13px; color:var(--muted); margin-bottom:8px; font-weight:500}
+  input[type=date], input[type=text], textarea{
+    width:100%; border:1px solid var(--line); background:transparent; color:var(--ink);
+    border-radius:10px; padding:11px 13px; font-family:inherit; font-size:15px;
+  }
+  input:focus, textarea:focus, button:focus-visible, .mood-pick button:focus-visible{
+    outline:2px solid var(--accent); outline-offset:2px;
+  }
+  textarea{resize:vertical; min-height:80px; line-height:1.5}
+  .three{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
+  @media (max-width:520px){ .three{grid-template-columns:1fr} }
+
+  .mood-pick{display:flex; justify-content:space-between; gap:6px}
+  .mood-pick button{
+    flex:1; border:1px solid var(--line); background:transparent; border-radius:12px;
+    padding:12px 4px; cursor:pointer; font-family:'Fraunces',serif; font-size:13px; color:var(--muted);
+    transition:border-color .15s, color .15s, background .15s;
+  }
+  .mood-pick button[aria-pressed="true"]{ border-color:var(--accent); color:var(--accent); background:var(--accent-soft) }
+  .mood-pick .emoji{display:block; font-size:22px; margin:0 auto 8px}
+
+  .save-row{display:flex; align-items:center; gap:14px; margin-top:4px}
+  button.save{
+    background:var(--accent); color:#fff; border:none; border-radius:10px;
+    padding:13px 22px; font-size:15px; font-weight:600; cursor:pointer; font-family:'Fraunces',serif;
+  }
+  button.save:hover{opacity:.92}
+  .status{font-size:13px; color:var(--muted)}
+
+  .history{margin-top:40px}
+  .history h2{font-family:'Fraunces',serif; font-weight:600; font-size:19px; margin:0 0 4px}
+  .history .sub{margin-bottom:16px}
+  .entry{
+    display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+    padding:14px 4px; border-bottom:1px solid var(--line); cursor:pointer; background:none; border-left:none; border-right:none; border-top:none;
+    width:100%; text-align:left; font-family:inherit; color:var(--ink);
+  }
+  .entry:hover{ color:var(--accent) }
+  .entry .d{font-size:14px; font-weight:500; white-space:nowrap}
+  .entry .h{font-size:14px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1}
+  .entry .m{font-family:'Fraunces',serif; font-size:13px; color:var(--accent); white-space:nowrap}
+  .empty{color:var(--muted); font-size:14px; padding:10px 4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">catat harinya, pelan-pelan</p>
+    <h1>Jurnal Harian</h1>
+    <p class="sub">Satu halaman baru, setiap hari.</p>
+  </header>
+
+  <div class="card">
+    <div class="field">
+      <label for="tanggal">Tanggal</label>
+      <input type="date" id="tanggal">
+    </div>
+
+    <div class="field">
+      <label>Mood</label>
+      <div class="mood-pick" id="moodPick" role="group" aria-label="Pilih mood"></div>
+    </div>
+
+    <div class="field">
+      <label>3 hal yang disyukuri</label>
+      <div class="three">
+        <input type="text" id="g1" placeholder="1">
+        <input type="text" id="g2" placeholder="2">
+        <input type="text" id="g3" placeholder="3">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="highlight">Highlight hari ini</label>
+      <input type="text" id="highlight" placeholder="Momen paling berkesan hari ini">
+    </div>
+
+    <div class="field">
+      <label for="catatan">Catatan / Refleksi</label>
+      <textarea id="catatan" placeholder="Tulis sepanjang yang kamu butuhkan..."></textarea>
+    </div>
+
+    <div class="field" style="margin-bottom:6px">
+      <label for="fokus">Fokus besok</label>
+      <input type="text" id="fokus" placeholder="Satu hal yang mau difokuskan besok">
+    </div>
+
+    <div class="save-row">
+      <button class="save" id="saveBtn">Simpan halaman ini</button>
+      <span class="status" id="status"></span>
+    </div>
+  </div>
+
+  <div class="history">
+    <h2>Halaman sebelumnya</h2>
+    <p class="sub">Klik untuk membuka kembali.</p>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<script>
+const MOODS = [
+  {id:1, label:'Senang', emoji:'😄'},
+  {id:2, label:'Sedih', emoji:'😢'},
+  {id:3, label:'Marah', emoji:'😠'},
+  {id:4, label:'Pusing', emoji:'😵'},
+  {id:5, label:'Bingung', emoji:'😕'},
+];
+let selectedMood = null;
+const STORAGE_KEY = 'jurnal-harian-entries';
+
+const moodPick = document.getElementById('moodPick');
+MOODS.forEach(m=>{
+  const btn = document.createElement('button');
+  btn.type='button';
+  btn.setAttribute('aria-pressed','false');
+  btn.innerHTML = `<span class="emoji">${m.emoji}</span>${m.label}`;
+  btn.addEventListener('click', ()=>{
+    selectedMood = m.id;
+    [...moodPick.children].forEach(c=>c.setAttribute('aria-pressed', c===btn ? 'true':'false'));
+  });
+  moodPick.appendChild(btn);
+});
+
+document.getElementById('tanggal').valueAsDate = new Date();
+
+function loadEntries(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(e){ return {}; }
+}
+function saveEntries(entries){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }catch(e){}
+}
+
+function renderHistory(){
+  const entries = loadEntries();
+  const dates = Object.keys(entries).sort().reverse();
+  const list = document.getElementById('historyList');
+  list.innerHTML = '';
+  if(dates.length === 0){
+    list.innerHTML = '<p class="empty">Belum ada halaman tersimpan.</p>';
+    return;
+  }
+  dates.forEach(d=>{
+    const e = entries[d];
+    const moodLabel = (MOODS.find(m=>m.id===e.mood)||{}).label || '';
+    const row = document.createElement('button');
+    row.className = 'entry';
+    const dateObj = new Date(d+'T00:00:00');
+    const dateStr = dateObj.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'});
+    row.innerHTML = `<span class="d">${dateStr}</span><span class="h">${e.highlight || '—'}</span><span class="m">${moodLabel}</span>`;
+    row.addEventListener('click', ()=>loadEntry(d));
+    list.appendChild(row);
+  });
+}
+
+function loadEntry(dateKey){
+  const entries = loadEntries();
+  const e = entries[dateKey];
+  if(!e) return;
+  document.getElementById('tanggal').value = dateKey;
+  document.getElementById('g1').value = e.gratitude?.[0] || '';
+  document.getElementById('g2').value = e.gratitude?.[1] || '';
+  document.getElementById('g3').value = e.gratitude?.[2] || '';
+  document.getElementById('highlight').value = e.highlight || '';
+  document.getElementById('catatan').value = e.catatan || '';
+  document.getElementById('fokus').value = e.fokus || '';
+  selectedMood = e.mood || null;
+  [...moodPick.children].forEach((c,i)=>c.setAttribute('aria-pressed', MOODS[i].id===selectedMood ? 'true':'false'));
+  document.getElementById('status').textContent = 'Halaman ' + dateKey + ' dimuat.';
+}
+
+document.getElementById('saveBtn').addEventListener('click', ()=>{
+  const dateKey = document.getElementById('tanggal').value;
+  const status = document.getElementById('status');
+  if(!dateKey){ status.textContent = 'Isi tanggal dulu.'; return; }
+  const entries = loadEntries();
+  entries[dateKey] = {
+    mood: selectedMood,
+    gratitude: [
+      document.getElementById('g1').value,
+      document.getElementById('g2').value,
+      document.getElementById('g3').value,
+    ],
+    highlight: document.getElementById('highlight').value,
+    catatan: document.getElementById('catatan').value,
+    fokus: document.getElementById('fokus').value,
+  };
+  saveEntries(entries);
+  status.textContent = 'Tersimpan ✓';
+  renderHistory();
+});
+
+renderHistory();
+</script>
+</body>
+</html>
