@@ -139,7 +139,36 @@
   </div>
 </div>
 
+<iframe name="hidden_iframe" style="display:none"></iframe>
 <script>
+const GFORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeVwWhnYMdjNz-2YS6UF71XERzYlOtI6GR_zBV53bKGeGSMZg/formResponse';
+const GFORM_ENTRIES = {
+  tanggal: 'entry.71475869',
+  mood: 'entry.1373234643',
+  g1: 'entry.1120930892',
+  g2: 'entry.246068848',
+  g3: 'entry.1459507735',
+  highlight: 'entry.639018466',
+  catatan: 'entry.530804697',
+  fokus: 'entry.596305341'
+};
+function sendToGoogleForm(data){
+  const form = document.createElement('form');
+  form.action = GFORM_URL;
+  form.method = 'POST';
+  form.target = 'hidden_iframe';
+  form.style.display = 'none';
+  Object.keys(GFORM_ENTRIES).forEach(key=>{
+    const input = document.createElement('input');
+    input.name = GFORM_ENTRIES[key];
+    input.value = data[key] || '';
+    form.appendChild(input);
+  });
+  document.body.appendChild(form);
+  form.submit();
+  form.remove();
+}
+
 const MOODS = [
   {id:1, label:'Senang', emoji:'😄'},
   {id:2, label:'Sedih', emoji:'😢'},
@@ -230,6 +259,19 @@ document.getElementById('saveBtn').addEventListener('click', ()=>{
     fokus: document.getElementById('fokus').value,
   };
   saveEntries(entries);
+
+  const moodLabel = (MOODS.find(m=>m.id===selectedMood)||{}).label || '';
+  sendToGoogleForm({
+    tanggal: dateKey,
+    mood: moodLabel,
+    g1: entries[dateKey].gratitude[0],
+    g2: entries[dateKey].gratitude[1],
+    g3: entries[dateKey].gratitude[2],
+    highlight: entries[dateKey].highlight,
+    catatan: entries[dateKey].catatan,
+    fokus: entries[dateKey].fokus
+  });
+
   status.textContent = 'Tersimpan ✓';
   renderHistory();
 });
